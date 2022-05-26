@@ -1,12 +1,12 @@
 import telegram
-from data import TOKEN, TEST_CHAT_ID, VNU_CHAT_ID
+import data
 from typing import Optional, Tuple
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, \
     ChatMemberUpdated, Chat, ChatMember
 from telegram.ext import CallbackContext, ContextTypes, CallbackQueryHandler, Updater, MessageHandler, Filters, \
     CommandHandler, ChatMemberHandler
 
-bot = telegram.Bot(TOKEN)
+bot = telegram.Bot(data.TOKEN)
 
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
@@ -47,59 +47,53 @@ def new_member_notification(update: Update, context: CallbackContext):
     if not was_member and is_member:
         member_name = update.chat_member.new_chat_member.user.username
         if member_name is not None:
-            bot.send_message(chat_id=VNU_CHAT_ID,
-                             text=f"@{member_name}, вітаємо у Чаті ВНУ! Ознайомтесь, будь ласка, з правилами чату",
+            bot.send_message(chat_id=data.VNU_CHAT_ID,
+                             text=f"@{member_name}, {data.GREETING_MESSAGE}",
                              reply_markup=reply_markup)
         else:
             member_name = update.chat_member.new_chat_member.user.full_name
-            bot.send_message(chat_id=VNU_CHAT_ID,
-                             text=f"{member_name}, вітаємо у Чаті ВНУ! Ознайомтесь, будь ласка, з правилами чату",
+            bot.send_message(chat_id=data.VNU_CHAT_ID,
+                             text=f"{member_name}, {data.GREETING_MESSAGE}",
                              reply_markup=reply_markup)
 
 
-def send_rules(member_id):
-    bot.send_message(chat_id=member_id,
-                     text="https://telegra.ph/Normativn%D1%96-%D1%96deolog%D1%96chn%D1%96-strateg%D1%96chn%D1%96-ta-%D1%96nformuvaln%D1%96-dokumenti-chatu-VNU-05-19")
-
-
 def private_messages(update: Update, context: CallbackContext) -> None:
-    if update.effective_chat.id != VNU_CHAT_ID:
+    if update.effective_chat.id != data.VNU_CHAT_ID:
         text = update.message.text
-        buttons = ["Правила", "Про мене", "Реклама", "Адміністрація чату"]
-        if text == buttons[0]:
+        if text == data.BUTTONS[0]:
             update.message.reply_text(
-                text="Ось наші правила: https://linktr.ee/vnuchat")
-        elif text == buttons[1]:
+                text=data.RULES_LINK)
+        elif text == data.BUTTONS[1]:
             update.message.reply_text(
-                text="Я бот, розроблений адміністратором чату @paitsun2 для ознайомлення нових учасників з правилами чату, якщо виникли якісь питання чи ви знайшли баг, прошу звертатись безпосередньо до мого розробника)")
-        elif text == buttons[2]:
+                text=data.ABOUT_ME)
+        elif text == data.BUTTONS[2]:
             update.message.reply_text(
-                text="жду коли стас доробить умови реклами")
-        elif text == buttons[3]:
+                text=data.ADVERTISMENT_OPTIONS)
+        elif text == data.BUTTONS[3]:
             update.message.reply_text(
-                text="Власник чату: @stanislavyakovsky\nТопадмін @paitsun2\nнадалі список адміністраторів формується...")
+                text=data.ADMINISTRATION)
         reply_markup = ReplyKeyboardMarkup(
             keyboard=[
                 [
-                    KeyboardButton(text="Правила"),
-                    KeyboardButton(text="Про мене")
+                    KeyboardButton(text=data.BUTTONS[0]),
+                    KeyboardButton(text=data.BUTTONS[1])
                 ],
                 [
-                    KeyboardButton(text="Реклама"),
-                    KeyboardButton(text="Адміністрація чату")
+                    KeyboardButton(text=data.BUTTONS[2]),
+                    KeyboardButton(text=data.BUTTONS[3])
                 ]
             ],
             resize_keyboard=True
         )
         if text == "/start":
             update.message.reply_text(
-                text="Привіт, я приватний бот, створений студентом спеціально для чату Волинського Національного Університету. Перед початком спілкування у нашому чаті, будь ласка, ознайомся з правилами та основними положеннями, або ж, якщо ти вже ознайомлений, можеш вибрати розділ, що тебе цікавить",
+                text=data.INIT_MESSAGE,
                 reply_markup=reply_markup)
 
 
 def main():
     updater = Updater(
-        token=TOKEN,
+        token=data.TOKEN,
         use_context=True
     )
 
